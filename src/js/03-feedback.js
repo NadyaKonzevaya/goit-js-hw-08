@@ -30,43 +30,48 @@
 // 5. Сделай так, чтобы хранилище обновлялось не чаще чем раз в 500 миллисекунд.
 //      Для этого добавь в проект и используй библиотеку lodash.throttle.
 
-const ref = {
+const refs = {
     form: document.querySelector(".feedback-form"),
     input: document.querySelector(".feedback-form input"),
     textarea: document.querySelector(".feedback-form textarea"),
-};    
+}; 
+
 const FORM_KEY = "feedback-form-state";
 const filledForm = localStorage.getItem(FORM_KEY);
 const parsedFormValue = JSON.parse(filledForm);
 const throttle = require('lodash.throttle');
 
 
-// ref.form.addEventListener("input", throttle((onFormInput), 500));
-ref.form.addEventListener("input", onFormInput);
-ref.form.addEventListener("submit", onFormSubmit);
+refs.form.addEventListener("input", throttle(onFormInput, 500));
+refs.form.addEventListener("submit", onFormSubmit);
 
-
-if (filledForm) {
-   updateData();
-};
+updateData();
 
 function updateData() {
-    ref.input.value = parsedFormValue.email;
-    ref.textarea.value = parsedFormValue.message;
-
+    if (filledForm) {
+        refs.input.value = parsedFormValue.email;
+        refs.textarea.value = parsedFormValue.message;
+    }
 };
 
 function onFormInput(event) {
     const FORM_VALUE = {
-    email: event.currentTarget.elements.email.value,
-    message: event.currentTarget.elements.message.value,
-}
+        email: refs.input.value,
+        message: refs.textarea.value,
+    }
     localStorage.setItem(FORM_KEY, JSON.stringify(FORM_VALUE));
 };
 
 function onFormSubmit(event) {
     event.preventDefault();
-    console.log(parsedFormValue);
-    // localStorage.clear();
-//    event.currentTarget.reset();
+    const FORM_VALUE = {
+        email: event.currentTarget.elements.email.value,
+        message: event.currentTarget.elements.message.value,
+    };
+    if (FORM_VALUE.email === "" || FORM_VALUE.message === "") {
+        return;
+    }
+    console.log(FORM_VALUE);
+    event.currentTarget.reset();
+    localStorage.clear();
 }
